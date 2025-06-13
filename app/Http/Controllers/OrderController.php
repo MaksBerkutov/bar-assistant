@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Client;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
@@ -10,61 +11,91 @@ use Illuminate\Support\Facades\DB;
 
 class OrderController extends Controller
 {
-    public function store(Request $request){
+    public function store(Request $request)
+    {
         $cart = session('cart', []);
         if (empty($cart)) {
             return redirect()->back()->with('error', 'Корзина пуста.');
         }
 
         $request->validate([
-            'payment_type' => 'required|in:cash,card',
+            'payment_type' => 'required|in:cash,card,debt,mixed',
+            'phone' => 'required_if:payment_type,debt|string|nullable',
+            'name' => 'required_if:payment_type,debt|string|nullable',
+            'cash_amount' => 'nullable|numeric|min:0',
+            'card_amount' => 'nullable|numeric|min:0',
         ]);
+
+
         DB::beginTransaction();
 
         try {
-            // Подсчёт общей суммы
             $total = collect($cart)->sum(function ($item) {
-                return $item['price'] ;
+                return $item['price'] * ($item['quantity'] ?? 1);
             });
 
-            // Создание заказа
+            // Обработка смешанных оплат
+            $cash = null;
+            $card = null;
+            $client = null;
+            if ($request->payment_type === 'mixed') {
+                $cash = $request->cash_amount ?? 0;
+                $card = $request->card_amount ?? 0;
+
+                if ($cash + $card !== $total) {
+                    return redirect()->back()->with('error', 'Сумма наличных и карты должна соответствовать общей сумме.');
+                }
+            }
+            else if( $request->payment_type==='debt'){
+                $client = Client::firstOrCreate(
+                    ['phone' => $request['phone']],
+                    ['name' => $request['name'] ?? '']
+                );
+            }
             $order = Order::create([
                 'total_price' => $total,
                 'payment_type' => $request->payment_type,
-            ]);
+                'phone' => $client == null? null:$client->phone,
+                'client_id' => $client == null? null:$client->id,
+                'cash_amount' => $cash,
+                'card_amount' => $card,
 
-            // Добавление товаров
+            ]);
 
             foreach ($cart as $item) {
                 OrderItem::create([
                     'order_id' => $order->id,
                     'product_id' => $item['product_id'],
+                    'quantity' => $item['quantity'] ?? 1,
                     'price' => $item['price'],
                     'comment' => $item['comment'] ?? null,
+                    'culinary_status' => $item['type'] === 'culinary' ? 'new' : null,
                 ]);
+
                 $product = Product::find($item['product_id']);
 
-                // Снижение количества на складе, если товар учитывается
                 if ($product->type === 'inventory' && $product->stock_quantity !== null) {
-                    $product->stock_quantity -= 1;
+                    $product->stock_quantity -= ($item['quantity'] ?? 1);
                     $product->save();
                 }
             }
-            DB::commit();
 
-            // Очистка корзины
+            DB::commit();
             session()->forget('cart');
 
             return redirect()->back()->with('success', 'Заказ успешно создан!');
         } catch (\Exception $e) {
-            dd($e->getMessage());
             DB::rollBack();
             return redirect()->back()->with('error', 'Ошибка при создании заказа: ' . $e->getMessage());
         }
     }
+
     public function details(Order $order)
     {
+
         $order->load('items.product');
+        $order->load(['items.product', 'client']);
+
         return response()->json($order);
     }
 
@@ -77,7 +108,67 @@ class OrderController extends Controller
         $total = $orders->sum('total_price');
         $totalCash = $orders->where('payment_type', 'cash')->sum('total_price');
         $totalCard = $orders->where('payment_type', 'card')->sum('total_price');
+        $totalMixedCash = $orders->where('payment_type', 'mixed')->sum('cash_amount');
+        $totalMixedCard = $orders->where('payment_type', 'mixed')->sum('card_amount');
+        $totalDebt = $orders->where('payment_type', 'debt')->sum('total_price');
 
-        return view('orders.report', compact('orders', 'date', 'total', 'totalCash', 'totalCard'));
+        return view('orders.report', compact(
+            'orders', 'date', 'total', 'totalCash', 'totalCard',
+            'totalMixedCash', 'totalMixedCard', 'totalDebt'
+        ));
+    }
+
+    public function debtorsToday()
+    {
+        $date = now()->format('Y-m-d');
+        $debts = Order::where('payment_type', 'debt')
+            ->whereDate('created_at', $date)
+            ->with('items.product')
+            ->get();
+
+        return view('orders.debtors', compact('debts', 'date'));
+    }
+
+    public function payDebtForm(Order $order)
+    {
+        return view('orders.pay_debt', compact('order'));
+    }
+
+    public function payDebt(Request $request, Order $order)
+    {
+        $request->validate([
+            'cash_amount' => 'nullable|numeric|min:0',
+            'card_amount' => 'nullable|numeric|min:0',
+        ]);
+
+        $total = $order->total_price;
+        $cash = $request->cash_amount ?? 0;
+        $card = $request->card_amount ?? 0;
+
+        if ($cash + $card != $total) {
+            return redirect()->back()->with('error', 'Сумма оплаты должна соответствовать общей сумме заказа.');
+        }
+        if($cash == 0){
+            $order->update([
+                'payment_type' => 'card',
+                'total_price' => $card,
+            ]);
+        }
+        else if($card == 0){
+            $order->update([
+                'payment_type' => 'cash',
+                'total_price' => $cash,
+            ]);
+        }
+        else{
+            $order->update([
+                'payment_type' => 'mixed',
+                'cash_amount' => $cash,
+                'card_amount' => $card,
+            ]);
+        }
+
+
+        return redirect()->route('orders.debtors')->with('success', 'Долг погашен!');
     }
 }

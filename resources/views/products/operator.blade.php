@@ -98,24 +98,53 @@
                         </form>
 
                         <!-- Выбор оплаты -->
-                        <form action="{{ route('orders.store') }}" method="POST">
+                        <form action="{{ route('orders.store') }}" method="POST" id="orderForm">
                             @csrf
                             <div class="mb-3">
-                                <label class="form-check-label">
-                                    <input type="radio" name="payment_type" value="cash" checked class="form-check-input">
-                                    Наличный расчёт
-                                </label><br>
-                                <label class="form-check-label">
-                                    <input type="radio" name="payment_type" value="card" class="form-check-input">
-                                    Безналичный расчёт
-                                </label>
+                                <label><input type="radio" name="payment_type" value="cash" class="form-check-input" checked> Наличный</label><br>
+                                <label><input type="radio" name="payment_type" value="card" class="form-check-input"> Безналичный</label><br>
+                                <label><input type="radio" name="payment_type" value="debt" class="form-check-input"> В долг</label><br>
+                                <label><input type="radio" name="payment_type" value="mixed" class="form-check-input"> Смешанная оплата</label>
+                            </div>
+
+                            <div id="phoneField" class="mb-3 d-none">
+                                <input type="text" name="phone" class="form-control" placeholder="Номер телефона">
+                                <input type="text" name="name" class="form-control" placeholder="Имя">
+
+                            </div>
+
+                            <div id="mixedFields" class="mb-3 d-none">
+                                <input type="number" step="0.01" name="cash_amount" class="form-control mb-2" placeholder="Сумма наличными" oninput="updateMixed()">
+                                <input type="number" step="0.01" name="card_amount" class="form-control" placeholder="Сумма картой" oninput="updateMixed()">
                             </div>
 
                             <button type="submit" class="btn btn-success w-100">Создать заказ</button>
                         </form>
+
+                        <script>
+                            const radios = document.querySelectorAll('input[name="payment_type"]');
+                            const phoneField = document.getElementById('phoneField');
+                            const mixedFields = document.getElementById('mixedFields');
+                            const total = {{ $total }};
+
+                            radios.forEach(radio => {
+                                radio.addEventListener('change', () => {
+                                    phoneField.classList.toggle('d-none', radio.value !== 'debt');
+                                    mixedFields.classList.toggle('d-none', radio.value !== 'mixed');
+                                });
+                            });
+
+                            function updateMixed() {
+                                let cash = parseFloat(document.querySelector('input[name="cash_amount"]').value) || 0;
+                                let card = total - cash;
+                                document.querySelector('input[name="card_amount"]').value = (card >= 0 ? card : 0).toFixed(2);
+                            }
+                        </script>
+
                     </div>
                 </div>
             </div>
         </div>
     </div>
+
 @endsection

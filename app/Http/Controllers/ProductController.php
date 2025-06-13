@@ -45,6 +45,7 @@ class ProductController extends Controller
             'name' => $product->name,
             'price' => $product->price,
             'comment' => $request->comment ?? null,
+            'type' => $product->type,
         ];
 
         session()->put('cart', $cart);

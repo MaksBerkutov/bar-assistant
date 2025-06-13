@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\ClientController;
+use App\Http\Controllers\KitchenController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PoolZoneController;
 use App\Http\Controllers\ProductController;
@@ -41,3 +42,10 @@ Route::get('/orders/report', [OrderController::class, 'report'])->name('orders.r
 Route::get('/orders/details/{order}', [OrderController::class, 'details'])->name('orders.details');
 
 
+Route::get('/orders/debtors', [OrderController::class, 'debtorsToday'])->name('orders.debtors');
+Route::get('/orders/{order}/pay-debt', [OrderController::class, 'payDebtForm'])->name('orders.payDebtForm');
+Route::post('/orders/{order}/pay-debt', [OrderController::class, 'payDebt'])->name('orders.payDebt');
+
+
+Route::get('/kitchen', [KitchenController::class, 'index'])->name('kitchen.index');
+Route::post('/kitchen/update-status/{item}', [KitchenController::class, 'updateStatus'])->name('kitchen.updateStatus');

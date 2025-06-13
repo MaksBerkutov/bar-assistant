@@ -6,7 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class OrderItem extends Model
 {
-    protected $fillable = ['order_id', 'product_id', 'quantity', 'price', 'comment'];
+    protected $fillable = ['order_id', 'product_id', 'quantity', 'price', 'comment',
+        'culinary_status', 'seat_number'];
 
     public function product(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {

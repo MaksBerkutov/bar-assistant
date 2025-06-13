@@ -1,25 +1,25 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="container">
+    <div class="container-fluid">
         <h3 class="mb-4">Создать новую зону</h3>
-        <form action="{{ route('poolzones.store') }}" method="POST" class="mb-4 row g-2">
+        <form action="{{ route('poolzones.store') }}" method="POST" class="row g-2 mb-4">
             @csrf
-            <div class="col-auto">
+            <div class="col-12 col-md-auto">
                 <input type="text" name="name" class="form-control" placeholder="Название зоны" required>
             </div>
-            <div class="col-auto">
-                <button type="submit" class="btn btn-primary">Создать</button>
+            <div class="col-12 col-md-auto">
+                <button type="submit" class="btn btn-primary w-100">Создать</button>
             </div>
         </form>
 
         <h1 class="mb-4">Схема зон бассейна</h1>
 
-        <form method="GET" action="{{ route('poolzones.index') }}" class="mb-4 row g-2 align-items-center">
-            <div class="col-auto">
+        <form method="GET" action="{{ route('poolzones.index') }}" class="row g-2 align-items-center mb-4">
+            <div class="col-12 col-md-auto">
                 <label for="pool_zone" class="form-label">Выбрать зону:</label>
             </div>
-            <div class="col-auto">
+            <div class="col-12 col-md-auto">
                 <select name="zone" id="pool_zone" class="form-select" onchange="this.form.submit()">
                     @foreach($poolZones as $pz)
                         <option value="{{ $pz->id }}" {{ $selectedZone && $selectedZone->id == $pz->id ? 'selected' : '' }}>
@@ -33,35 +33,41 @@
         @if($selectedZone)
             <h2 class="mb-3">{{ $selectedZone->name }}</h2>
 
-            <div class="mb-4 d-flex flex-wrap gap-3">
+            <div class="row g-2 mb-4">
                 <!-- Лежак -->
-                <form action="{{ route('zones.store') }}" method="POST" class="d-flex align-items-center gap-2">
-                    @csrf
-                    <input type="hidden" name="pool_zone_id" value="{{ $selectedZone->id }}">
-                    <input type="hidden" name="type" value="лежак">
-                    <button type="submit" class="btn btn-outline-secondary">Добавить лежак</button>
-                </form>
+                <div class="col-12 col-sm-4 col-md-auto">
+                    <form action="{{ route('zones.store') }}" method="POST" class="d-flex flex-wrap align-items-center gap-2">
+                        @csrf
+                        <input type="hidden" name="pool_zone_id" value="{{ $selectedZone->id }}">
+                        <input type="hidden" name="type" value="лежак">
+                        <button type="submit" class="btn btn-outline-secondary w-100">Добавить лежак</button>
+                    </form>
+                </div>
 
                 <!-- Бунгало -->
-                <form action="{{ route('zones.store') }}" method="POST" class="d-flex align-items-center gap-2">
-                    @csrf
-                    <input type="hidden" name="pool_zone_id" value="{{ $selectedZone->id }}">
-                    <input type="hidden" name="type" value="бунгало">
-                    <button type="submit" class="btn btn-outline-success">Добавить бунгало</button>
-                </form>
+                <div class="col-12 col-sm-4 col-md-auto">
+                    <form action="{{ route('zones.store') }}" method="POST" class="d-flex flex-wrap align-items-center gap-2">
+                        @csrf
+                        <input type="hidden" name="pool_zone_id" value="{{ $selectedZone->id }}">
+                        <input type="hidden" name="type" value="бунгало">
+                        <button type="submit" class="btn btn-outline-success w-100">Добавить бунгало</button>
+                    </form>
+                </div>
 
                 <!-- Беседка -->
-                <form action="{{ route('zones.store') }}" method="POST" class="d-flex align-items-center gap-2">
-                    @csrf
-                    <input type="hidden" name="pool_zone_id" value="{{ $selectedZone->id }}">
-                    <input type="hidden" name="type" value="беседка">
-                    <input type="text" name="name" class="form-control" placeholder="Название беседки" required>
-                    <button type="submit" class="btn btn-outline-info">Добавить беседку</button>
-                </form>
+                <div class="col-12 col-sm-12 col-md-auto">
+                    <form action="{{ route('zones.store') }}" method="POST" class="d-flex flex-wrap align-items-center gap-2">
+                        @csrf
+                        <input type="hidden" name="pool_zone_id" value="{{ $selectedZone->id }}">
+                        <input type="hidden" name="type" value="беседка">
+                        <input type="text" name="name" class="form-control" placeholder="Название беседки" required>
+                        <button type="submit" class="btn btn-outline-info">Добавить беседку</button>
+                    </form>
+                </div>
             </div>
 
             <!-- Карта зоны -->
-            <div class="position-relative border bg-light" style="width: 100%; height: 600px;">
+            <div class="position-relative border bg-light overflow-auto" style="width: 100%; height: 600px;">
                 @foreach($selectedZone->zones as $zone)
                     <div style="
                     position: absolute;
@@ -73,6 +79,10 @@
                     border: 1px solid #333;
                     padding: 5px;
                     cursor: move;
+                    font-size: 0.9rem;
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
                 "
                          draggable="true"
                          ondragend="savePosition({{ $zone->id }}, event)"
@@ -111,7 +121,6 @@
                 </div>
             </div>
         </div>
-
     </div>
 
     <script>
@@ -135,7 +144,6 @@
         }
 
         let priceModal;
-
         document.addEventListener('DOMContentLoaded', function () {
             priceModal = new bootstrap.Modal(document.getElementById('priceModal'));
         });

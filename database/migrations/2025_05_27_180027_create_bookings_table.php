@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('client_id')->constrained()->onDelete('cascade');
             $table->date('date');
-            $table->enum('status', ['active', 'cancelled'])->default('active');
+            $table->enum('status', ['active', 'cancelled','moved'])->default('active');
             $table->foreignId('zone_id')->constrained()->onDelete('cascade');
             $table->decimal('prepayment')->nullable();
             $table->timestamps();

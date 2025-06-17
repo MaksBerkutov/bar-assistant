@@ -9,21 +9,18 @@ class Booking extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
-        'client_id',
-        'zone_id',
-        'date',
-        'prepayment',
-        'status',         // active, completed, cancelled
-    ];
+    protected $fillable = ['client_id','zone_id','date','prepayment','status','arrived','order_id'];
+
 
     public function client(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(Client::class);
     }
 
-    public function zone(): \Illuminate\Database\Eloquent\Relations\HasOne
+    public function zone(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
-        return $this->hasOne(Zone::class);
+        return $this->belongsTo(Zone::class);
     }
+    public function order() { return $this->belongsTo(Order::class); }
+
 }

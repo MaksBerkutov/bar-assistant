@@ -9,8 +9,10 @@ class ClientController extends Controller
 {
     function findByMobilePhone(Request $request){
         $request->validate([
-            'phone' => 'required|string',
+            'phone' => ['required', 'regex:/^\+380\d{9}$/'],
         ]);
+
+
         Client::where('phone', $request->get('phone'))->firstOrFail();
 
         return response()->json(['status' => 'ok']);
@@ -19,7 +21,7 @@ class ClientController extends Controller
     function store(Request $request){
         $request->validate([
             'name' => 'required',
-            'phone' => 'required|string',
+            'phone' => ['required', 'regex:/^\+380\d{9}$/'],
             'note' =>'string'
         ]);
 

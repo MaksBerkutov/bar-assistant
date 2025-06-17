@@ -103,7 +103,8 @@
         <div class="modal fade" id="priceModal" tabindex="-1" aria-labelledby="priceModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content p-3">
-                    <form id="priceForm">
+                    <form id="priceForm" method="post" >
+                        @csrf
                         <input type="hidden" name="zone_id" id="price_zone_id">
                         <div class="mb-3">
                             <label class="form-label">Цена:</label>
@@ -152,6 +153,7 @@
             document.getElementById('price_zone_id').value = zoneId;
             document.getElementById('price_value').value = price;
             document.getElementById('prepayment_value').value = recommended;
+            document.getElementById('priceForm').action = `/zones/${zoneId}/price`;
             priceModal.show();
         }
 

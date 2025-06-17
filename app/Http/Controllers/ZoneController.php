@@ -44,12 +44,13 @@ class ZoneController extends Controller
     }
     public function updatePrice(Request $request, Zone $zone)
     {
-        $zone->update($request->validate([
+        $validated = $request->validate([
             'price' => 'nullable|numeric',
-            'recommended_prepayment' => 'nullable|numeric'
-        ]));
-
+            'recommended_prepayment' => 'nullable|numeric',
+        ]);
+        $zone->update($validated);
         return back();
     }
+
 
 }

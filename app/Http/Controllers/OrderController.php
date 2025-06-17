@@ -70,6 +70,7 @@ class OrderController extends Controller
                     'price' => $item['price'],
                     'comment' => $item['comment'] ?? null,
                     'culinary_status' => $item['type'] === 'culinary' ? 'new' : null,
+                    'seat_number' => $item['seat_number'] ?? null,
                 ]);
 
                 $product = Product::find($item['product_id']);

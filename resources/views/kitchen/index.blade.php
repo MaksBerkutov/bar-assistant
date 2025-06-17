@@ -19,7 +19,7 @@
                         <p><strong>Комментарий:</strong> {{ $item->comment }}</p>
                     @endif
                     @if($item->seat_number)
-                        <p><strong>Номер лежака/беседки:</strong> {{ $item->seat_number }}</p>
+                        <p><strong>Номерок:</strong> {{ $item->seat_number }}</p>
                     @endif
                     <p><strong>Текущий статус:</strong>
                     @switch($item->culinary_status)

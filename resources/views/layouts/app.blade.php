@@ -1,4 +1,27 @@
-<!DOCTYPE html>
+@php
+    use Illuminate\Support\Facades\Auth;
+    $menuItem = [
+        ['url' => route('poolzones.index'), 'name' => 'Схема зон','role'=>'Admin,System'],
+        ['url' => route('booking.map'), 'name' => 'Бронирование','role'=>'Admin,Employer,System'],
+        ['url' => route('products.create'), 'name' => 'Добавить товар','role'=>'Admin,System'],
+        ['url' => route('products.index'), 'name' => 'Смена','role'=>'Admin,Employer,System'],
+        ['url' => route('orders.debtors'), 'name' => 'Должники','role'=>'Admin,Employer,System'],
+        ['url' => route('kitchen.index'), 'name' => 'Кухня','role'=>'Admin,Employer,System'],
+        ['url' => route('orders.report'), 'name' => 'Отчёт','role'=>'Admin,System'],
+    ];
+    $user = Auth::user();
+    $userRoles = explode(',', $user->role);  // Assuming `role` is a comma-separated string
+
+$filteredMenuItems = array_filter($menuItem, function ($item) use ($userRoles) {
+    $itemRoles = explode(',', $item['role']);
+    return !empty(array_intersect($userRoles, $itemRoles));
+});
+
+$filteredMenuItems = array_values($filteredMenuItems);
+
+@endphp
+
+    <!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
@@ -6,6 +29,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1"> <!-- 🔹 Важно для мобильных -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+
 
 </head>
 <body>
@@ -19,27 +43,12 @@
 
         <div class="collapse navbar-collapse" id="mainNavbar">
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ route('poolzones.index') }}">Схема зон</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ route('booking.map') }}">Бронирование</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ route('products.create') }}">Добавить товар</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ route('products.index') }}">Смена</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ route('orders.report') }}">Отчёт</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ route('orders.debtors') }}">Должники</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ route('kitchen.index') }}">Кухня</a>
-                </li>
+                @foreach($filteredMenuItems as $item)
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ $item['url'] }}">{{ $item['name'] }}</a>
+                    </li>
+                @endforeach
+
             </ul>
         </div>
     </div>

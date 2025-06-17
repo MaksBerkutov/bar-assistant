@@ -22,7 +22,10 @@ class ProductController extends Controller
             $query->where('type', $request->type);
         }
 
-        $products = $query->get();
+        $products = $query->get()->map(function($product) {
+            $product->photo_url = $product->photo ? asset('storage/' . $product->photo) : null;
+            return $product;
+        });
 
         return view('products.operator', [
             'products' => $products,
@@ -31,6 +34,7 @@ class ProductController extends Controller
             'selectedType' => $request->type
         ]);
     }
+
     public function create(){
         return view('products.create');
     }
@@ -45,6 +49,7 @@ class ProductController extends Controller
             'name' => $product->name,
             'price' => $product->price,
             'comment' => $request->comment ?? null,
+            'seat_number' => $request->seat_number ?? null,
             'type' => $product->type,
         ];
 
@@ -71,7 +76,7 @@ class ProductController extends Controller
         session()->forget('cart');
         return redirect()->back()->with('success', 'Заказ создан');
     }
-    public function  store(Request $request)
+    public function store(Request $request)
     {
         $request->validate([
             'name' => 'required|string',
@@ -79,11 +84,21 @@ class ProductController extends Controller
             'price' => 'required|numeric',
             'type' => 'required|string',
             'stock_quantity' => 'numeric|nullable',
-            'photo'=> 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
-        Product::create($request->all());
-        return redirect()->route('products.index')->with('success', '<UNK> <UNK> <UNK> <UNK>');
+
+        $data = $request->all();
+
+        if ($request->hasFile('photo')) {
+            $photoPath = $request->file('photo')->store('resources/products', 'public');
+            $data['photo'] = $photoPath; // сохраняем относительный путь
+        }
+
+        Product::create($data);
+
+        return redirect()->route('products.index')->with('success', 'Товар успешно добавлен');
     }
+
 
 
 }

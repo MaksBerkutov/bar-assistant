@@ -43,8 +43,13 @@
                 <input type="number" name="stock_quantity" class="form-control">
             </div>
 
+            <div class="col-md-6" id="purchase_price_field">
+                <label for="purchase_price" class="form-label">Закупочная цена (грн):</label>
+                <input type="number" step="0.01" name="purchase_price" class="form-control">
+            </div>
+
             <div class="col-md-6">
-                <label for="price" class="form-label">Цена (грн):</label>
+                <label for="price" class="form-label">Цена продажи (грн):</label>
                 <input type="number" name="price" step="0.01" class="form-control" required>
             </div>
 
@@ -63,7 +68,12 @@
         function toggleFields() {
             const type = document.getElementById('type').value;
             const stockField = document.getElementById('stock_field');
-            stockField.style.display = (type === 'inventory') ? 'block' : 'none';
+            const purchasePriceField = document.getElementById('purchase_price_field');
+
+            const hasInventory = ['inventory', 'draft', 'hookah'].includes(type);
+
+            stockField.style.display = hasInventory ? 'block' : 'none';
+            purchasePriceField.style.display = hasInventory ? 'block' : 'none';
         }
 
         document.addEventListener('DOMContentLoaded', toggleFields);

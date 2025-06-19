@@ -5,7 +5,7 @@
         <h2 class="mb-4">Панель оператора: Товары</h2>
 
         <!-- Поиск -->
-        <form method="GET" action="{{ route('products.index') }}" class="mb-3 d-flex">
+        <form method="GET" action="{{ route('products.operator') }}" class="mb-3 d-flex">
             <input type="text" name="search" value="{{ $search }}" class="form-control me-2" placeholder="Поиск по штрихкоду или названию">
             <button type="submit" class="btn btn-primary">Поиск</button>
         </form>
@@ -24,7 +24,7 @@
             @endphp
 
             @foreach($types as $key => $label)
-                <a href="{{ route('products.index', ['type' => $key]) }}">
+                <a href="{{ route('products.operator', ['type' => $key]) }}">
                     <button type="button" class="btn me-2 {{ $selectedType == $key ? 'btn-primary' : 'btn-outline-primary' }}">
                         {{ $label }}
                     </button>

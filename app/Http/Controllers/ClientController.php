@@ -27,4 +27,27 @@ class ClientController extends Controller
 
         Client::create($request->all());
     }
+
+    public function index()
+    {
+        $clients = Client::all();
+        return view('clients.index', compact('clients'));
+    }
+
+    public function edit(Client $client)
+    {
+        return view('clients.edit', compact('client'));
+    }
+
+    public function update(Request $request, Client $client)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'phone' => 'required|string|max:20',
+        ]);
+
+        $client->update($request->only('name', 'phone'));
+
+        return redirect()->route('clients.index')->with('success', 'Клиент обновлён.');
+    }
 }

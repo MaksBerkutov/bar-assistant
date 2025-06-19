@@ -59,6 +59,7 @@ class OrderController extends Controller
                 'client_id' => $client == null? null:$client->id,
                 'cash_amount' => $cash,
                 'card_amount' => $card,
+                'user_id' => auth()->id(),
 
             ]);
 

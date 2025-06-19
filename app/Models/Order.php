@@ -8,7 +8,7 @@ class Order extends Model
 {
     protected $fillable = [
         'total_price', 'payment_type', 'phone',
-        'cash_amount', 'card_amount','client_id'
+        'cash_amount', 'card_amount','client_id','user_id'
     ];
 
     public function items(): \Illuminate\Database\Eloquent\Relations\HasMany
@@ -18,6 +18,10 @@ class Order extends Model
     public function client(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(Client::class);
+    }
+    public function users(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(User::class);
     }
 
 

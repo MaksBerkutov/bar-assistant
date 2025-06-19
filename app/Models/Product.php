@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Product extends Model
 {
-    protected $fillable = ['name', 'barcode', 'type', 'stock_quantity', 'price', 'photo'];
+    protected $fillable = ['name', 'barcode', 'type','purchase_price', 'stock_quantity', 'price', 'photo'];
 
     public function scopeOfType($query, $type)
     {

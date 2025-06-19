@@ -9,6 +9,49 @@ class ProductController extends Controller
 {
     public function index(Request $request)
     {
+        $query = Product::query();
+
+        if ($request->filled('search')) {
+            $query->where('name', 'like', '%' . $request->search . '%')
+                ->orWhere('barcode', 'like', '%' . $request->search . '%');
+        }
+
+        $products = $query->orderBy('name')->paginate(20);
+
+        return view('products.index', compact('products'));
+    }
+
+    public function edit(Product $product)
+    {
+        return view('products.edit', compact('product'));
+    }
+
+    public function update(Request $request, Product $product)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'barcode' => 'nullable|string|max:100',
+            'type' => 'required|string',
+            'purchase_price' => 'nullable|numeric',
+            'stock_quantity' => 'nullable|integer',
+            'price' => 'required|numeric',
+            'photo' => 'nullable|image|max:2048',
+        ]);
+
+        if ($request->hasFile('photo')) {
+            // Удалим старое фото если есть
+            if ($product->photo) {
+                Storage::delete($product->photo);
+            }
+            $validated['photo'] = $request->file('photo')->store('products');
+        }
+
+        $product->update($validated);
+
+        return redirect()->route('products.index')->with('success', 'Товар обновлён');
+    }
+    public function operator(Request $request)
+    {
         $query = \App\Models\Product::query();
 
         if ($request->filled('search')) {
@@ -55,7 +98,7 @@ class ProductController extends Controller
 
         session()->put('cart', $cart);
 
-        return redirect()->route('products.index', ['type' => $request->category]);
+        return redirect()->route('products.operator', ['type' => $request->category]);
     }
     public function clearCart() {
         session()->forget('cart');
@@ -84,6 +127,7 @@ class ProductController extends Controller
             'price' => 'required|numeric',
             'type' => 'required|string',
             'stock_quantity' => 'numeric|nullable',
+            'purchase_price' => 'numeric|nullable',
             'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
 
@@ -91,7 +135,7 @@ class ProductController extends Controller
 
         if ($request->hasFile('photo')) {
             $photoPath = $request->file('photo')->store('resources/products', 'public');
-            $data['photo'] = $photoPath; // сохраняем относительный путь
+            $data['photo'] = $photoPath;
         }
 
         Product::create($data);

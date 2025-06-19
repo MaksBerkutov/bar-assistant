@@ -7,7 +7,6 @@ use App\Http\Controllers\KitchenController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PoolZoneController;
 use App\Http\Controllers\ProductController;
-use App\Http\Controllers\TelegramBotController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ZoneController;
 use Illuminate\Support\Facades\Auth;
@@ -34,7 +33,7 @@ Route::middleware(['auth'])->group(function () {
             Route::post('/{id}/cancel',[BookingController::class,'cancel']);
         });
 
-        Route::prefix('kitchen')->group(function () {
+        Route::prefix('orders')->group(function () {
             Route::post('/', [OrderController::class, 'store'])->name('orders.store');
             Route::get('/debtors', [OrderController::class, 'debtorsToday'])->name('orders.debtors');
             Route::get('/{order}/pay-debt', [OrderController::class, 'payDebtForm'])->name('orders.payDebtForm');
@@ -97,6 +96,13 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/', [UserController::class, 'index'])->name('users.index');
             Route::put('/{user}/role', [UserController::class, 'updateRole'])->name('users.updateRole');
         });
+        Route::prefix('orders')->group(function () {
+            Route::get('/{order}/edit', [OrderController::class, 'edit'])->name('orders.edit');
+            Route::put('/{order}', [OrderController::class, 'update'])->name('orders.update');
+            Route::get('/', [OrderController::class, 'index'])->name('orders.index');
+            Route::delete('/{order}', [OrderController::class, 'destroy'])->name('orders.destroy');
+        });
+
     });
 
 });

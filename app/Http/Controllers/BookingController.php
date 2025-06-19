@@ -53,6 +53,7 @@ class BookingController extends Controller
         }
         $order = Order::create([
             'client_id'=>$client->id,
+            'user_id'=>auth()->id(),
             'phone'=>$client->phone,
             'payment_type'=>$data['payment_type'],
             'total_price'=>$data['prepayment'],
@@ -139,6 +140,7 @@ class BookingController extends Controller
 
         $order = Order::create([
             'total_price' => $rest,
+            'user_id'=>auth()->id(),
             'payment_type' => $request->payment_type,
             'cash_amount' => $cash,
             'card_amount' => $card,

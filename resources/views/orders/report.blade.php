@@ -185,7 +185,7 @@
                                     ${item.product!=null?item.product.name:""} — ${item.quantity} × ${item.price} грн
                                     = ${item.quantity * item.price} грн
                                     ${item.comment ? `<br><em>Комментарий: ${item.comment}</em>` : ''}
-                                    ${item.seat_number `<br><em>Номерок: ${item.seat_number}</em>` : ''}
+                                    ${item.seat_number ? `<br><em>Номерок: ${item.seat_number}</em>` : ''}
                                 </div>
                             </li>`;
                     });

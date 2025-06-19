@@ -9,7 +9,7 @@
         value="{{ old($name, $value) }}"
         maxlength="19"
         autocomplete="off"
-        required
+
         oninput="handlePhoneInput(this)"
     >
     @if($showDivPlaceholder)

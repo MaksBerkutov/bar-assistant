@@ -173,4 +173,81 @@ class OrderController extends Controller
 
         return redirect()->route('orders.debtors')->with('success', 'Долг погашен!');
     }
+    public function index(Request $request)
+    {
+        $query = Order::with(['client', 'user', 'items.product']);
+
+        if ($request->filled('start_date') && $request->filled('end_date')) {
+            $query->whereBetween('created_at', [$request->start_date, $request->end_date]);
+        }
+
+        $orders = $query->orderByDesc('created_at')->paginate(20);
+        if ($search = $request->input('search')) {
+            $query->where('id', $search)
+                ->orWhere('phone', 'like', "%$search%");
+        }
+
+        $orders = $query->paginate(20);
+
+        return view('orders.index', compact('orders', 'search'));
+    }
+
+    public function destroy(\App\Models\Order $order)
+    {
+        $order->items()->delete();
+        $order->delete();
+
+        return redirect()->route('orders.index')->with('success', 'Заказ удалён');
+    }
+
+    public function edit(Order $order)
+    {
+        $order->load('items.product');
+        $products = Product::all();
+
+        return view('orders.edit', compact('order', 'products'));
+    }
+
+    public function update(Request $request, Order $order)
+    {
+        DB::transaction(function () use ($request, $order) {
+            // Обновляем общие поля заказа
+            $order->update([
+                'payment_type' => $request->payment_type,
+                'cash_amount' => $request->cash_amount,
+                'card_amount' => $request->card_amount,
+            ]);
+
+            // Обновляем существующие позиции
+            foreach ($request->items ?? [] as $itemData) {
+                if (!empty($itemData['delete'])) {
+                    OrderItem::where('id', $itemData['id'])->delete();
+                    continue;
+                }
+
+                OrderItem::where('id', $itemData['id'])->update([
+                    'product_id' => $itemData['product_id'],
+                    'price' => $itemData['price'],
+                    'quantity' => $itemData['quantity'],
+                    'comment' => $itemData['comment'],
+                ]);
+            }
+
+            // Добавление новой позиции
+            if (!empty($request->new_item['product_id'])) {
+                $order->items()->create([
+                    'product_id' => $request->new_item['product_id'],
+                    'price' => $request->new_item['price'],
+                    'quantity' => $request->new_item['quantity'],
+                    'comment' => $request->new_item['comment'],
+                ]);
+            }
+
+            // Пересчёт общей суммы
+            $total = $order->items()->sum(DB::raw('price * quantity'));
+            $order->update(['total_price' => $total]);
+        });
+
+        return redirect()->route('orders.edit', $order)->with('success', 'Заказ обновлён');
+    }
 }

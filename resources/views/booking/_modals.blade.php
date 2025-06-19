@@ -7,7 +7,6 @@
             <div class="modal-header"><h5>Бронирование</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
             <div class="modal-body">
                 <input type="hidden" name="zone_id" id="zone_id">
-                <div><input name="phone" class="form-control" placeholder="Телефон"></div>
                 <x-phone-input name="phone" placeholder="Укажите номер телефона"  />
 
                 <div><input name="name" class="form-control mt-2" placeholder="Имя (если первый раз)"></div>

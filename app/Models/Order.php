@@ -19,7 +19,7 @@ class Order extends Model
     {
         return $this->belongsTo(Client::class);
     }
-    public function users(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    public function user(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(User::class);
     }

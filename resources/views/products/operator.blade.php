@@ -86,7 +86,8 @@
                                 </div>
 
                                 <div id="phoneField" class="mb-3 d-none">
-                                    <input type="text" name="phone" class="form-control mb-2" placeholder="Номер телефона">
+                                    <!--input type="text" name="phone" class="form-control mb-2" placeholder="Номер телефона"-->
+                                    <x-phone-input name="phone" placeholder="Номер телефона"  />
                                     <input type="text" name="name" class="form-control" placeholder="Имя">
                                 </div>
 

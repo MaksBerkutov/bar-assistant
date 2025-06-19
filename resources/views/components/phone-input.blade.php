@@ -1,43 +1,29 @@
-<div class="mb-3">
+<div class="mb-3 position-relative">
     <label for="phone_{{$name}}" class="form-label">Номер телефона</label>
     <input
         type="text"
         class="form-control"
         id="phone_{{$name}}"
         name="{{$name}}"
-        placeholder="{{$placeholder}}}"
+        placeholder="{{$placeholder}}"
         value="{{ old($name, $value) }}"
         maxlength="19"
-        onkeydown="if(event.key === 'Backspace') deleteFoemat(this, event)"
-        oninput="formatPhone(this)"
+        autocomplete="off"
         required
+        oninput="handlePhoneInput(this)"
     >
     @if($showDivPlaceholder)
         <div class="form-text">Введите номер телефона в формате: 0XX1122333</div>
     @endif
-</div>
-<script>
-    function deleteFoemat(input, event){
-        let value = input.value;
-        let isDeleting = event.key === "Backspace"; // Проверяем, была ли нажата клавиша Backspace
 
-        // Если был нажат Backspace, обрабатываем удаление
-        if (isDeleting) {
-            if (value[value.length - 1] === '-' || value[value.length - 1] === ')') {
-                // Удаляем разделительный символ, если это тире или закрывающая скобка
-                value = value.slice(0, value.length - 2); // Удаляем два последних символа
-                input.value = value;
-            }
-        }
-    }
+    <div id="suggestions_{{$name}}" class="list-group position-absolute w-100" style="z-index: 1000;"></div>
+</div>
+
+<script>
     function formatPhone(input) {
         let value = input.value.replace(/\D/g, '');
-        // Если есть префикс 38, то убираем его
-        if (value.slice(0, 2) === '38') {
-            value = value.slice(2);
-        }
+        if (value.slice(0, 2) === '38') value = value.slice(2);
 
-        // Форматируем номер по частям
         if (value.length <= 3) {
             input.value = `+38 (${value}`;
         } else if (value.length <= 5) {
@@ -51,11 +37,46 @@
         }
     }
 
-    // Обрабатываем нажатие клавиши
-    document.querySelector("#phone_{{$name}}").addEventListener('keydown', function(event) {
-        console.log("WORKER")
-        formatPhone(this, event);
+    function handlePhoneInput(input) {
+        formatPhone(input);
+
+        const raw = input.value;
+        const suggestionsBox = document.getElementById('suggestions_{{$name}}');
+
+        if (raw.length < 3) {
+            suggestionsBox.innerHTML = '';
+            return;
+        }
+
+        fetch(`/clients/search?query=${raw}`)
+            .then(res => res.json())
+            .then(data => {
+                suggestionsBox.innerHTML = '';
+                data.forEach(client => {
+                    const item = document.createElement('button');
+                    item.className = 'list-group-item list-group-item-action';
+                    item.innerText = `${client.name} (${client.phone})`;
+                    item.type = 'button';
+                    item.onclick = () => {
+                        input.value = formatRawPhone(client.phone);
+                        suggestionsBox.innerHTML = '';
+                    };
+                    suggestionsBox.appendChild(item);
+                });
+            });
+    }
+
+    function formatRawPhone(phone) {
+        let value = phone.replace(/\D/g, '');
+        if (value.slice(0, 2) === '38') value = value.slice(2);
+
+        return `+38 (${value.slice(0, 3)}) ${value.slice(3, 6)}-${value.slice(6, 8)}-${value.slice(8, 10)}`;
+    }
+
+    document.addEventListener('click', function (e) {
+        const suggestionsBox = document.getElementById('suggestions_{{$name}}');
+        if (!e.target.closest(`#phone_{{$name}}`) && !e.target.closest(`#suggestions_{{$name}}`)) {
+            suggestionsBox.innerHTML = '';
+        }
     });
-
-
 </script>

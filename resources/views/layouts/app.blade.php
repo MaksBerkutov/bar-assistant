@@ -1,28 +1,45 @@
 @php
     use Illuminate\Support\Facades\Auth;
-    $menuItem = [
-        ['url' => route('poolzones.index'), 'name' => 'Схема зон','role'=>'Admin,System'],
-        ['url' => route('booking.map'), 'name' => 'Бронирование','role'=>'Admin,Employer,System'],
-        ['url' => route('products.index'), 'name' => 'Товары','role'=>'Admin,System'],
-        ['url' => route('products.create'), 'name' => 'Добавить товар','role'=>'Admin,System'],
-        ['url' => route('products.operator'), 'name' => 'Смена','role'=>'Admin,Employer,System'],
-        ['url' => route('orders.debtors'), 'name' => 'Должники','role'=>'Admin,Employer,System'],
-        ['url' => route('kitchen.index'), 'name' => 'Кухня','role'=>'Admin,Employer,System'],
-        ['url' => route('orders.report'), 'name' => 'Отчёт','role'=>'Admin,System'],
-        ['url' => route('clients.index'), 'name' => 'Клиенты','role'=>'Admin,System'],
-        ['url' => route('analytics.index'), 'name' => 'Аналитика','role'=>'Admin,System'],
-        ['url' => route('users.index'), 'name' => 'Пользователи','role'=>'System'],
+
+    $menuGroups = [
+        'Бронирование' => [
+            ['url' => route('poolzones.index'), 'name' => 'Схема зон', 'role' => 'Admin,System'],
+            ['url' => route('booking.map'), 'name' => 'Бронирование', 'role' => 'Admin,Employer,System'],
+        ],
+        'Товары' => [
+            ['url' => route('products.index'), 'name' => 'Все товары', 'role' => 'Admin,System'],
+            ['url' => route('products.create'), 'name' => 'Добавить товар', 'role' => 'Admin,System'],
+        ],
+        'Смена' => [
+            ['url' => route('products.operator'), 'name' => 'Смена', 'role' => 'Admin,Employer,System'],
+            ['url' => route('kitchen.index'), 'name' => 'Кухня', 'role' => 'Admin,Employer,System'],
+            ['url' => route('orders.debtors'), 'name' => 'Должники', 'role' => 'Admin,Employer,System'],
+        ],
+        'Аналитика' => [
+            ['url' => route('orders.report'), 'name' => 'Отчёт', 'role' => 'Admin,System'],
+            ['url' => route('analytics.index'), 'name' => 'Аналитика', 'role' => 'Admin,System'],
+        ],
+        'Система' => [
+            ['url' => route('clients.index'), 'name' => 'Клиенты', 'role' => 'Admin,System'],
+            ['url' => route('users.index'), 'name' => 'Пользователи', 'role' => 'System'],
+        ],
     ];
+
     $user = Auth::user();
     $userRoles = explode(',', $user->role);
 
-$filteredMenuItems = array_filter($menuItem, function ($item) use ($userRoles) {
-    $itemRoles = explode(',', $item['role']);
-    return !empty(array_intersect($userRoles, $itemRoles));
-});
+    // Фильтрация по ролям
+    $filteredMenuGroups = [];
+    foreach ($menuGroups as $groupName => $items) {
+        $filteredItems = array_filter($items, function ($item) use ($userRoles) {
+            $itemRoles = explode(',', $item['role']);
+            return !empty(array_intersect($userRoles, $itemRoles));
+        });
 
-$filteredMenuItems = array_values($filteredMenuItems);
-
+        if (!empty($filteredItems)) {
+            $filteredMenuGroups[$groupName] = array_values($filteredItems);
+        }
+    }
 @endphp
 
     <!DOCTYPE html>
@@ -47,21 +64,35 @@ $filteredMenuItems = array_values($filteredMenuItems);
 
         <div class="collapse navbar-collapse" id="mainNavbar">
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                @foreach($filteredMenuItems as $item)
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ $item['url'] }}">{{ $item['name'] }}</a>
-                    </li>
+                @foreach ($filteredMenuGroups as $groupName => $items)
+                    @if(count($items) === 1)
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ $items[0]['url'] }}">{{ $items[0]['name'] }}</a>
+                        </li>
+                    @else
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="dropdown-{{ Str::slug($groupName) }}" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                {{ $groupName }}
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="dropdown-{{ Str::slug($groupName) }}">
+                                @foreach($items as $item)
+                                    <li><a class="dropdown-item" href="{{ $item['url'] }}">{{ $item['name'] }}</a></li>
+                                @endforeach
+                            </ul>
+                        </li>
+                    @endif
                 @endforeach
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ route('logout') }}"
-                           onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-                            Выход
-                        </a>
-                    </li>
-                    <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
-                        @csrf
-                    </form>
+
+                {{-- Logout --}}
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ route('logout') }}"
+                       onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                        Выход
+                    </a>
+                </li>
+                <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">@csrf</form>
             </ul>
+
         </div>
     </div>
 </nav>

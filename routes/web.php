@@ -45,6 +45,8 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/', [KitchenController::class, 'index'])->name('kitchen.index');
             Route::post('/update-status/{item}', [KitchenController::class, 'updateStatus'])->name('kitchen.updateStatus');
         });
+        Route::get('/clients/search', [ClientController::class, 'search'])->name('clients.search');
+
     });
 
 

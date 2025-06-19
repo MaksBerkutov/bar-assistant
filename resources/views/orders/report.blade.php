@@ -25,6 +25,7 @@
                 <th>Сумма</th>
                 <th>Тип оплаты</th>
                 <th>Время</th>
+                <th>Продавец</th>
             </tr>
             </thead>
             <tbody>
@@ -42,6 +43,13 @@
                         @endswitch
                     </td>
                     <td>{{ $order->created_at->format('H:i:s') }}</td>
+                    <td>
+                        @if($order->user_id!=null)
+                            {{$order->user->name}}
+                        @else
+                            Система
+                        @endif
+                    </td>
                 </tr>
             @endforeach
             </tbody>

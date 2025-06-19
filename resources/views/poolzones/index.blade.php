@@ -70,20 +70,24 @@
             <div class="position-relative border bg-light overflow-auto" style="width: 100%; height: 600px;">
                 @foreach($selectedZone->zones as $zone)
                     <div style="
-                    position: absolute;
-                    left: {{ $zone->position_x }}px;
-                    top: {{ $zone->position_y }}px;
-                    width: {{ $zone->type == 'лежак' ? 80 : ($zone->type == 'бунгало' ? 160 : 240) }}px;
-                    height: 50px;
-                    background: {{ $zone->type == 'беседка' ? '#bde0fe' : ($zone->type == 'бунгало' ? '#caffbf' : '#ffd6a5') }};
-                    border: 1px solid #333;
-                    padding: 5px;
-                    cursor: move;
-                    font-size: 0.9rem;
-                    white-space: nowrap;
-                    overflow: hidden;
-                    text-overflow: ellipsis;
-                "
+        position: absolute;
+        left: {{ $zone->position_x }}px;
+        top: {{ $zone->position_y }}px;
+        width: {{ $zone->type == 'лежак' ? 80 : ($zone->type == 'бунгало' ? 160 : 240) }}px;
+        height: 50px;
+        background: {{ $zone->type == 'беседка' ? '#bde0fe' : ($zone->type == 'бунгало' ? '#caffbf' : '#ffd6a5') }};
+        border: 1px solid #333;
+        border-radius: 5px;
+        padding: 5px;
+        cursor: move;
+        font-size: 0.9rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        "
                          draggable="true"
                          ondragend="savePosition({{ $zone->id }}, event)"
                          ondblclick="openPriceModal({{ $zone->id }}, {{ $zone->price ?? 0 }}, {{ $zone->recommended_prepayment ?? 0 }})"
@@ -93,10 +97,11 @@
                             @method('DELETE')
                             <button type="submit" onclick="return confirm('Удалить элемент?')" class="btn btn-sm btn-danger p-0">×</button>
                         </form>
-                        {{ $zone->type == 'беседка' ? $zone->name : $zone->type . ' #' . $zone->id }}
+                        {{ $zone->type == 'беседка' ? $zone->name : $zone->type}}
                     </div>
                 @endforeach
             </div>
+
         @endif
 
         <!-- Модальное окно для цены -->

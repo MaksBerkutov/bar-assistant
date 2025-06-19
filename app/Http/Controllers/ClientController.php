@@ -50,4 +50,15 @@ class ClientController extends Controller
 
         return redirect()->route('clients.index')->with('success', 'Клиент обновлён.');
     }
+    public function search(Request $request)
+    {
+        $query = $request->input('query');
+
+        $clients = \App\Models\Client::where('phone', 'like', '%' . $query . '%')
+            ->limit(5)
+            ->get(['id', 'name', 'phone']);
+
+        return response()->json($clients);
+    }
+
 }

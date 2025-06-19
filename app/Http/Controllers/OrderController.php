@@ -21,7 +21,7 @@ class OrderController extends Controller
         $request->validate([
             'payment_type' => 'required|in:cash,card,debt,mixed',
             'phone' => 'required_if:payment_type,debt|string|nullable',
-            'name' => 'required_if:payment_type,debt|string|nullable',
+            'name' => 'string|nullable',
             'cash_amount' => 'nullable|numeric|min:0',
             'card_amount' => 'nullable|numeric|min:0',
         ]);

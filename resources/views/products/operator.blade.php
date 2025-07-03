@@ -18,7 +18,9 @@
                     'culinary' => 'Кулинария',
                     'cocktail' => 'Коктейли',
                     'hookah' => 'Кальяны',
-                    'draft' => 'Разливные напитки'
+                    'draft' => 'Разливные напитки',
+                    'services' => 'Услуги',
+                    'coffee' => 'Кофе'
                 ];
                 $selectedType = request('type') ?? session('selected_category');
             @endphp
@@ -79,10 +81,15 @@
                                 @csrf
 
                                 <div class="mb-3">
-                                    <label><input type="radio" name="payment_type" value="cash" class="form-check-input" checked> Наличный</label><br>
                                     <label><input type="radio" name="payment_type" value="card" class="form-check-input"> Безналичный</label><br>
+                                    <label><input type="radio" name="payment_type" value="cash" class="form-check-input" checked> Наличный</label><br>
                                     <label><input type="radio" name="payment_type" value="debt" class="form-check-input"> В долг</label><br>
                                     <label><input type="radio" name="payment_type" value="mixed" class="form-check-input"> Смешанная оплата</label>
+                                </div>
+                                <div id="cashHelper" class="mb-3 d-none">
+                                    <input type="number" id="helpCash" name="helpCash" class="form-control" placeholder="Сумма которую дали" oninput="calculate()">
+                                    <input disabled type="number" id="helpCashResult" name="helpCashResult" class="form-control" placeholder="Остаток суммы">
+
                                 </div>
 
                                 <div id="phoneField" class="mb-3 d-none">
@@ -143,12 +150,22 @@
         const radios = document.querySelectorAll('input[name="payment_type"]');
         const phoneField = document.getElementById('phoneField');
         const mixedFields = document.getElementById('mixedFields');
+        const cashHelper = document.getElementById('cashHelper');
         const total = {{ $total }};
+        function calculate(){
+            const helpCash = document.getElementById('helpCash').value;
+            document.getElementById('helpCashResult').value = helpCash - total;
+
+
+
+        }
+
 
         radios.forEach(radio => {
             radio.addEventListener('change', () => {
                 phoneField.classList.toggle('d-none', radio.value !== 'debt');
                 mixedFields.classList.toggle('d-none', radio.value !== 'mixed');
+                cashHelper.classList.toggle('d-none', radio.value !== 'cash');
             });
         });
 

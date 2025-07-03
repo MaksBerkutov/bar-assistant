@@ -78,6 +78,10 @@ Route::middleware(['auth'])->group(function () {
         Route::prefix('orders')->group(function () {
             Route::get('/report', [OrderController::class, 'report'])->name('orders.report');
             Route::get('/details/{order}', [OrderController::class, 'details'])->name('orders.details');
+            Route::get('/{order}/edit', [OrderController::class, 'edit'])->name('orders.edit');
+            Route::put('/{order}', [OrderController::class, 'update'])->name('orders.update');
+            Route::get('/', [OrderController::class, 'index'])->name('orders.index');
+            Route::delete('/{order}', [OrderController::class, 'destroy'])->name('orders.destroy');
         });
 
         Route::prefix('clients')->group(function () {
@@ -96,12 +100,7 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/', [UserController::class, 'index'])->name('users.index');
             Route::put('/{user}/role', [UserController::class, 'updateRole'])->name('users.updateRole');
         });
-        Route::prefix('orders')->group(function () {
-            Route::get('/{order}/edit', [OrderController::class, 'edit'])->name('orders.edit');
-            Route::put('/{order}', [OrderController::class, 'update'])->name('orders.update');
-            Route::get('/', [OrderController::class, 'index'])->name('orders.index');
-            Route::delete('/{order}', [OrderController::class, 'destroy'])->name('orders.destroy');
-        });
+     
 
     });
 

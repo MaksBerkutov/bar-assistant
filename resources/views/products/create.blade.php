@@ -22,7 +22,7 @@
                 <input type="text" name="name" class="form-control" required>
             </div>
 
-            <div class="col-md-6">
+            <div class="col-md-6"  id="barcode_field">
                 <label for="barcode" class="form-label">Штрихкод:</label>
                 <input type="text" name="barcode" class="form-control">
             </div>
@@ -35,6 +35,8 @@
                     <option value="draft">Разливные напитки</option>
                     <option value="cocktail">Коктейль</option>
                     <option value="hookah">Кальян</option>
+                    <option value="services">Услуги</option>
+                    <option value="coffee">Кофе</option>
                 </select>
             </div>
 
@@ -69,11 +71,13 @@
             const type = document.getElementById('type').value;
             const stockField = document.getElementById('stock_field');
             const purchasePriceField = document.getElementById('purchase_price_field');
+            const barcodeField = document.getElementById('barcode_field');
 
-            const hasInventory = ['inventory', 'draft', 'hookah'].includes(type);
+            const hasInventory = ['inventory'].includes(type);
 
             stockField.style.display = hasInventory ? 'block' : 'none';
             purchasePriceField.style.display = hasInventory ? 'block' : 'none';
+            barcodeField.style.display = hasInventory ? 'block' : 'none';
         }
 
         document.addEventListener('DOMContentLoaded', toggleFields);

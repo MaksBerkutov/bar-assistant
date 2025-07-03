@@ -26,6 +26,8 @@
                     <option value="draft" @selected($product->type === 'draft')>Разливные напитки</option>
                     <option value="cocktail" @selected($product->type === 'cocktail')>Коктейль</option>
                     <option value="hookah" @selected($product->type === 'hookah')>Кальян</option>
+                    <option value="services" @selected($product->type === 'services')>Услуги</option>
+                    <option value="coffee" @selected($product->type === 'coffee')>Кофе</option>
                 </select>
             </div>
 

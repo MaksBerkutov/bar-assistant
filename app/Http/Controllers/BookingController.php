@@ -18,7 +18,6 @@ class BookingController extends Controller
         $zones = PoolZone::all();
         $selectedZone = null;
         $selectedDate = $request->get('date', date('Y-m-d'));
-        $bookedZoneIds = [];
         $allBookingDate = [];
 
         if ($request->get('zone')) {
@@ -26,8 +25,9 @@ class BookingController extends Controller
             $allBookingDate = Booking::where('date', $selectedDate)->get();
 
         }
-
-        return view('booking.map', compact('zones', 'selectedZone', 'selectedDate','allBookingDate'));    }
+        $userAgent = $request->header('User-Agent');
+        $isMobile = preg_match('/Mobile|Android|iPhone|iPad|iPod/i', $userAgent);
+        return view($isMobile?'booking.mobile':'booking.map', compact('zones', 'selectedZone', 'selectedDate','allBookingDate'));    }
 
     public function store(Request $r)
     {

@@ -22,7 +22,7 @@
         'Система' => [
             ['url' => route('clients.index'), 'name' => 'Клиенты', 'role' => 'Admin,System'],
             ['url' => route('users.index'), 'name' => 'Пользователи', 'role' => 'System'],
-            ['url' => route('orders.index'), 'name' => 'Заказы', 'role' => 'System'],
+            ['url' => route('orders.index'), 'name' => 'Заказы', 'role' => 'Admin,System'],
         ],
     ];
 

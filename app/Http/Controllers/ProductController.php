@@ -70,12 +70,18 @@ class ProductController extends Controller
             return $product;
         });
 
-        return view('products.operator', [
-            'products' => $products,
-            'cart' => session()->get('cart', []),
-            'search' => $request->search,
-            'selectedType' => $request->type
-        ]);
+        $userAgent = $request->header('User-Agent');
+        $isMobile = preg_match('/Mobile|Android|iPhone|iPad|iPod/i', $userAgent);
+
+        return view(
+            $isMobile ? 'products.mobile-operator' : 'products.operator',
+            [
+                'products' => $products,
+                'cart' => session()->get('cart', []),
+                'search' => $request->search,
+                'selectedType' => $request->type,
+            ]
+        );
     }
 
     public function create(){
@@ -108,14 +114,12 @@ class ProductController extends Controller
     {
         $cart = session()->get('cart', []);
         unset($cart[$index]);
-        session()->put('cart', array_values($cart)); // переиндексируем
+        session()->put('cart', array_values($cart));
         return back();
     }
 
     public function createOrder() {
-        // Здесь логика создания заказа из сессии
         $cart = session('cart', []);
-        // Сохраняешь заказ, очищаешь корзину
         session()->forget('cart');
         return redirect()->back()->with('success', 'Заказ создан');
     }

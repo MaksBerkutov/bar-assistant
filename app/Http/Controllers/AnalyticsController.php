@@ -1,6 +1,7 @@
 <?php
 namespace App\Http\Controllers;
 
+use App\Models\CashWithdrawal;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;

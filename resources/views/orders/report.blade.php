@@ -55,6 +55,49 @@
             </tbody>
         </table>
 
+        <div class="mt-4">
+            <h4>
+                <a class="text-decoration-none" data-bs-toggle="collapse" href="#cashWithdrawalsTable" role="button" aria-expanded="false" aria-controls="cashWithdrawalsTable">
+                    Инкасация
+                    <i class="bi bi-chevron-down" id="cashToggleIcon"></i>
+                </a>
+            </h4>
+
+            <div class="collapse" id="cashWithdrawalsTable">
+                <div class="table-responsive">
+                    <table class="table table-striped table-bordered align-middle">
+                        <thead class="table-dark">
+                        <tr>
+                            <th>ID</th>
+                            <th>Сумма</th>
+                            <th>Комментарий</th>
+                            <th>Время</th>
+                            <th>Продавец</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        @foreach($cashWithdrawn as $withdrawn)
+                            <tr>
+                                <td>{{ $withdrawn->id }}</td>
+                                <td>{{ number_format($withdrawn->amount, 2, '.', ' ') }} грн</td>
+                                <td>{{ $withdrawn->comment ?? '—' }}</td>
+                                <td>{{ $withdrawn->created_at->format('H:i:s') }}</td>
+                                <td>
+                                    @if($withdrawn->user_id)
+                                        {{ $withdrawn->user->name }}
+                                    @else
+                                        Система
+                                    @endif
+                                </td>
+                            </tr>
+                        @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+
         <!-- Итого по типам оплат -->
         <div class="mt-4">
             <h4>
@@ -85,6 +128,25 @@
                     <li class="list-group-item d-flex justify-content-between">
                         <span>В долг:</span> <strong>{{ $totalDebt }} грн</strong>
                     </li>
+                    <li class="list-group-item d-flex justify-content-between">
+                        <span>Взято с кассы:</span> <strong>{{ $cashWithdrawnSum }} грн</strong>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between">
+                        <span>Всего наличными (включая смешанные):</span>
+                        <strong>{{ $totalCash + $totalMixedCash }} грн</strong>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between">
+                        <span>Всего картой (включая смешанные):</span>
+                        <strong>{{ $totalCard + $totalMixedCard }} грн</strong>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between bg-light">
+                        <span><strong>Общая сумма:</strong></span>
+                        <strong>{{ $total}} грн</strong>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between bg-light">
+                        <span><strong>Общая сумма c учётом инкассации:</strong></span>
+                        <strong>{{ $total-$cashWithdrawnSum}} грн</strong>
+                    </li>
                 </ul>
             </div>
 
@@ -92,8 +154,11 @@
             <h5 class="mt-4">Сводка:</h5>
             <ul class="list-group">
                 <li class="list-group-item d-flex justify-content-between">
+                    <span>Взято с кассы:</span> <strong>{{ $cashWithdrawnSum }} грн</strong>
+                </li>
+                <li class="list-group-item d-flex justify-content-between">
                     <span>Всего наличными (включая смешанные):</span>
-                    <strong>{{ $totalCash + $totalMixedCash }} грн</strong>
+                    <strong>{{ $totalCash + $totalMixedCash -$cashWithdrawnSum }} грн</strong>
                 </li>
                 <li class="list-group-item d-flex justify-content-between">
                     <span>Всего картой (включая смешанные):</span>
@@ -101,7 +166,7 @@
                 </li>
                 <li class="list-group-item d-flex justify-content-between bg-light">
                     <span><strong>Общая сумма:</strong></span>
-                    <strong>{{ $total }} грн</strong>
+                    <strong>{{ $total-$cashWithdrawnSum}} грн</strong>
                 </li>
             </ul>
         </div>
@@ -124,6 +189,21 @@
 
     <!-- Скрипт модального окна -->
     <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const toggle = document.querySelector('[data-bs-toggle="collapse"][href="#cashWithdrawalsTable"]');
+            const icon = document.getElementById('cashToggleIcon');
+            const collapse = document.getElementById('cashWithdrawalsTable');
+
+            collapse.addEventListener('show.bs.collapse', () => {
+                icon.classList.remove('bi-chevron-down');
+                icon.classList.add('bi-chevron-up');
+            });
+
+            collapse.addEventListener('hide.bs.collapse', () => {
+                icon.classList.remove('bi-chevron-up');
+                icon.classList.add('bi-chevron-down');
+            });
+        });
         document.addEventListener('DOMContentLoaded', function () {
             const collapseEl = document.getElementById('detailedStats');
             const icon = document.getElementById('statsToggleIcon');

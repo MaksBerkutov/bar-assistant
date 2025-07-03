@@ -14,10 +14,17 @@
             ['url' => route('products.operator'), 'name' => 'Смена', 'role' => 'Admin,Employer,System'],
             ['url' => route('kitchen.index'), 'name' => 'Кухня', 'role' => 'Admin,Employer,System'],
             ['url' => route('orders.debtors'), 'name' => 'Должники', 'role' => 'Admin,Employer,System'],
+            ['url' => route('withdrawals.create'), 'name' => 'Снятие налички', 'role' => 'Admin,Employer,System'],
         ],
         'Аналитика' => [
             ['url' => route('orders.report'), 'name' => 'Отчёт', 'role' => 'Admin,System'],
             ['url' => route('analytics.index'), 'name' => 'Аналитика', 'role' => 'Admin,System'],
+            ['url' => route('withdrawals.index'), 'name' => 'Все снятия ', 'role' => 'Admin,System'],
+
+        ],
+        'Команды'=>[
+            ['url'=>route('zone.pricing.form'),'name'=>'Смена цен на зоны','role' => 'System'],
+            ['url'=>route('zone.pricing.form'),'name'=>'Смена цен на зоны','role' => 'System']
         ],
         'Система' => [
             ['url' => route('clients.index'), 'name' => 'Клиенты', 'role' => 'Admin,System'],

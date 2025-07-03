@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AnalyticsController;
 use App\Http\Controllers\BookingController;
+use App\Http\Controllers\CashWithdrawalController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\KitchenController;
 use App\Http\Controllers\OrderController;
@@ -9,6 +10,7 @@ use App\Http\Controllers\PoolZoneController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ZoneController;
+use App\Http\Controllers\ZonePricingController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 Route::middleware(['auth'])->group(function () {
@@ -31,6 +33,12 @@ Route::middleware(['auth'])->group(function () {
             Route::post('/{id}/arrived',[BookingController::class,'markArrived']);
             Route::post('/{id}/move',[BookingController::class,'move']);
             Route::post('/{id}/cancel',[BookingController::class,'cancel']);
+        });
+        Route::prefix('withdrawals')->group(function () {
+
+            Route::get('/create', [CashWithdrawalController::class, 'create'])->name('withdrawals.create');
+            Route::post('/', [CashWithdrawalController::class, 'store'])->name('withdrawals.store');
+
         });
 
         Route::prefix('orders')->group(function () {
@@ -64,6 +72,9 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/', [PoolZoneController::class, 'index'])->name('poolzones.index');
             Route::post('/', [PoolZoneController::class, 'store'])->name('poolzones.store');
 
+        });
+        Route::prefix('withdrawals')->group(function () {
+            Route::get('/', [CashWithdrawalController::class, 'index'])->name('withdrawals.index');
         });
 
         Route::prefix('products')->group(function () {
@@ -100,7 +111,12 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/', [UserController::class, 'index'])->name('users.index');
             Route::put('/{user}/role', [UserController::class, 'updateRole'])->name('users.updateRole');
         });
-     
+        Route::prefix('command')->group(function () {
+            Route::get('/zone-pricing', [ZonePricingController::class, 'form'])->name('zone.pricing.form');
+            Route::post('/zone-pricing', [ZonePricingController::class, 'update'])->name('zone.pricing.update');
+
+        });
+
 
     });
 

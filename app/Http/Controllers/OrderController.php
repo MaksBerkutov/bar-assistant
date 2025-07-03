@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\CashWithdrawal;
 use App\Models\Client;
 use App\Models\Order;
 use App\Models\OrderItem;
@@ -113,10 +114,12 @@ class OrderController extends Controller
         $totalMixedCash = $orders->where('payment_type', 'mixed')->sum('cash_amount');
         $totalMixedCard = $orders->where('payment_type', 'mixed')->sum('card_amount');
         $totalDebt = $orders->where('payment_type', 'debt')->sum('total_price');
+        $cashWithdrawnSum = CashWithdrawal::whereDate('created_at', today())->sum('amount');
+        $cashWithdrawn = CashWithdrawal::whereDate('created_at', today())->get();
 
         return view('orders.report', compact(
             'orders', 'date', 'total', 'totalCash', 'totalCard',
-            'totalMixedCash', 'totalMixedCard', 'totalDebt'
+            'totalMixedCash', 'totalMixedCard', 'totalDebt','cashWithdrawnSum','cashWithdrawn'
         ));
     }
 

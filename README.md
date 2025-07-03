@@ -1,61 +1,100 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Bar Assistant 🍹
+## Автоматизация для небольших курортных комплексов.
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
 
-## About Laravel
+**Bar Assistant** — это веб-приложение для комплексной автоматизации работы в баре, пляжном комплексе или кальянном заведении. Проект помогает управлять бронированием зон, заказами, кухней, кальянами, клиентами и аналитикой — всё в одном интерфейсе.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## 🚀 Возможности
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+- 📍 **Управление зонами**: визуальное отображение лежаков, беседок, бунгало с возможностью брони.
+- 📅 **Бронирование**: предоплата, остаток, приход клиента, перенос и отмена.
+- 🛒 **Система заказов**: добавление товаров, кальянов, кулинарии, смешанная оплата.
+- 💸 **Типы оплаты**: наличные, карта, в долг, смешанная.
+- 🍔 **Кухонный модуль**: передача заказов на кухню, статусы (в процессе / готов / отдан).
+- 📊 **Аналитика**: выручка по дням, популярные товары, предсказание трендов.
+- 📦 **Управление товарами**: категории, штрихкоды, фото, остатки, закупочные цены.
+- 📱 **Адаптивный интерфейс**: работает на десктопах и мобильных устройствах.
+- 🧑‍🤝‍🧑 **Роли пользователей**: администратор, оператор, кухня.
+- 🤖 **Telegram-бот**: отчёты, уведомления, просмотр логов и заказов.
+- 🔐 **Авторизация**: разграничение доступа по ролям.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## 🛠️ Технологии
 
-## Learning Laravel
+- Backend: [Laravel](https://laravel.com/) (PHP 8+)
+- Frontend: Blade + Bootstrap 5 (без Livewire / Vite)
+- Database: MySQL
+- Telegram API: Polling (без webhook)
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+## 📦 Установка
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+```bash
+git clone https://github.com/yourusername/bar-assistant.git
+cd bar-assistant
+composer install
+cp .env.example .env
+php artisan key:generate
+php artisan migrate --seed
+php artisan serve
+```
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+> Убедитесь, что настроены права на `storage/` и `bootstrap/cache`.
 
-## Laravel Sponsors
+## 🤖 Настройка Telegram-бота
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+1. Создайте бота через [@BotFather](https://t.me/BotFather) и получите токен.
+2. В `.env` добавьте:
+```env
+TELEGRAM_BOT_TOKEN=your_token_here
+```
+3. Запустите polling-команду (например, через Supervisor):
+```bash
+php artisan telegram:poll
+```
+4. В панели администратора можно просматривать отчёты, отправлять логи и управлять ботом.
 
-### Premium Partners
+## ☁️ Деплой (Linux, Apache/Nginx)
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+1. Склонируйте репозиторий на сервер.
+2. Настройте `.env` и подключение к БД.
+3. Выполните миграции и сиды:
+```bash
+php artisan migrate --seed
+```
+4. Настройте права на папки `storage/` и `bootstrap/cache`.
+5. Установите Supervisor или другой процесс для Telegram polling:
+```bash
+php artisan TelegramBot 
+```
+## 🧪 Тестовые пользователи
 
-## Contributing
+| Роль       | Логин             | Пароль    |
+|------------|-------------------|-----------|
+| Admin      | admin@example.com | password  |
+| Employer   | emp@example.com   | password  |
+| Kitchen    | cook@example.com  | password  |
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## 📚 Структура проекта
 
-## Code of Conduct
+- `app/Models` — модели: заказ, товар, клиент, бронь и т.д.
+- `app/Http/Controllers` — логика бронирования, заказов, отчётов, Telegram и т.д.
+- `resources/views` — Blade-шаблоны интерфейса
+- `routes/web.php` — маршруты веб-интерфейса
+- `routes/api.php` — API (если нужно)
+- `database/seeders` — сидеры для тестовых данных
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+## ✅ ToDo / Планы
 
-## Security Vulnerabilities
+- [x] Поддержка предоплаты и долгов
+- [x] Telegram-бот для отчётов и алертов
+- [ ] Генерация отчётов в PDF
+- [ ] Мобильное PWA-приложение
+- [ ] Интеграция с POS-терминалами
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+## 🤝 Авторы
 
-## License
+- **Maks Berkutov** — разработка и архитектура
+- Telegram: [@i37Holodok73i](https://t.me/i37Holodok73i)
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+## 📄 Лицензия
+
+Проект лицензирован под MIT. Свободно используйте, улучшайте и внедряйте в своих заведениях 🍸

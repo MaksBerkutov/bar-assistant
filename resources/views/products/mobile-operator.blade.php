@@ -93,7 +93,7 @@
                         @if (!empty($item['seat_number']))
                             <div class="text-muted small">Номерок: {{ $item['seat_number'] }}</div>
                         @endif
-                   
+
                         <div class="d-flex justify-content-between align-items-center">
                             <form action="{{ route('products.removeFromCart', $index) }}" method="POST" class="d-inline me-2">
                                 @csrf

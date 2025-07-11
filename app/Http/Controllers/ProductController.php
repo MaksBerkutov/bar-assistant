@@ -106,7 +106,9 @@ class ProductController extends Controller
         foreach ($cart as &$item) {
             if (
                 $item['product_id'] == $product->id &&
-                ($item['comment'] ?? '') == ($request->comment ?? '')
+                ($item['comment'] ?? '') == ($request->comment ?? '')&&
+                ($item['price'] ?? '') == ($request->custom_price ?? $item['price'])
+
             ) {
                 $item['quantity'] += $request->quantity ?? 1;
                 $found = true;

@@ -17,6 +17,7 @@ Route::middleware(['auth'])->group(function () {
 
     Route::middleware(['role:Admin,Employer,System'])->group(function () {
         Route::prefix('products')->group(function () {
+            Route::put('/cart/update/{index}', [ProductController::class, 'updateQuantity'])->name('products.updateQuantity');
             Route::get('/operator', [ProductController::class, 'operator'])->name('products.operator');
             Route::post('/add-to-cart', [ProductController::class, 'addToCart'])->name('products.addToCart');
             Route::post('/clear-cart', [ProductController::class, 'clearCart'])->name('products.clearCart');

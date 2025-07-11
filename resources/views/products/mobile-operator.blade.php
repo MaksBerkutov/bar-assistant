@@ -21,8 +21,6 @@
                     'draft' => 'Разливные',
                     'services' => 'Услуги',
                     'coffee' => 'Кофе'
-
-
                 ];
                 $selectedType = request('type') ?? session('selected_category');
             @endphp
@@ -35,102 +33,120 @@
             @endforeach
         </div>
 
-        <!-- Главное содержимое -->
-        <div class="d-flex flex-column">
-            <!-- Товары -->
-            <div class="mb-4">
-                <div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 g-3">
-                    @foreach($products as $product)
-                        <div class="col">
-                            <div class="card h-100">
-                                <img src="{{ $product->photo ? asset('storage/' . $product->photo) : 'https://png.pngtree.com/png-vector/20221125/ourmid/pngtree-no-image-available-icon-flatvector-illustration-pic-design-profile-vector-png-image_40966566.jpg' }}"
-                                     class="card-img-top" style="object-fit: contain; height: 100px; background-color: #f8f9fa;">
-                                <div class="card-body p-2">
-                                    <h6 class="card-title">{{ $product->name }}</h6>
-                                    <p class="card-text mb-2">Цена: {{ $product->price }} грн</p>
-                                    <form method="POST" action="{{ route('products.addToCart') }}">
-                                        @csrf
-                                        <input type="hidden" name="product_id" value="{{ $product->id }}">
-                                        <input type="hidden" name="category" value="{{ $selectedType }}">
-                                        @if ($product->type == 'culinary' || $product->type == 'cocktail')
-                                            <input type="text" name="comment" class="form-control mb-1" placeholder="Комментарий">
-                                            <input type="number" name="seat_number" class="form-control mb-2" placeholder="Номерок">
-                                        @endif
-                                        <button type="submit" class="btn btn-sm btn-success w-100">Добавить</button>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-                    @endforeach
-                </div>
+        <!-- Корзина -->
+        <div class="card mb-4">
+            <div class="card-header text-center">
+                <h5 class="mb-0">Текущий заказ</h5>
             </div>
+            <div class="card-body">
+                @php
+                    $total = collect($cart)->sum(fn($item) => $item['price'] * ($item['quantity'] ?? 1));
+                @endphp
+                <p class="mb-3"><strong>Общая сумма: {{ $total }} грн</strong></p>
 
-            <!-- Корзина -->
-            <div class="card mb-4">
-                <div class="card-header text-center">
-                    <h5 class="mb-0">Текущий заказ</h5>
-                </div>
-                <div class="card-body">
-                    @php $total = array_sum(array_column($cart, 'price')); @endphp
+                <!-- Форма создания заказа -->
+                <form action="{{ route('orders.store') }}" method="POST" id="orderForm">
+                    @csrf
+                    <div class="mb-3">
+                        <label class="form-check-label"><input type="radio" name="payment_type" value="card" class="form-check-input"> Безналичный</label><br>
+                        <label class="form-check-label"><input type="radio" name="payment_type" value="cash" class="form-check-input" checked> Наличный</label><br>
+                        <label class="form-check-label"><input type="radio" name="payment_type" value="debt" class="form-check-input"> В долг</label><br>
+                        <label class="form-check-label"><input type="radio" name="payment_type" value="mixed" class="form-check-input"> Смешанная</label>
+                    </div>
 
-                    <p class="mb-3"><strong>Общая сумма: {{ $total }} грн</strong></p>
+                    <div id="cashHelper" class="mb-3 ">
+                        <input type="number" id="helpCash" name="helpCash" class="form-control mb-1" placeholder="Сумма которую дали" oninput="calculate()">
+                        <input disabled type="number" id="helpCashResult" class="form-control" placeholder="Остаток">
+                    </div>
 
-                    <!-- Форма создания заказа -->
-                    <form action="{{ route('orders.store') }}" method="POST" id="orderForm">
-                        @csrf
-                        <div class="mb-3">
-                            <label class="form-check-label"><input type="radio" name="payment_type" value="card" class="form-check-input"> Безналичный</label><br>
-                            <label class="form-check-label"><input type="radio" name="payment_type" value="cash" class="form-check-input" checked> Наличный</label><br>
-                            <label class="form-check-label"><input type="radio" name="payment_type" value="debt" class="form-check-input"> В долг</label><br>
-                            <label class="form-check-label"><input type="radio" name="payment_type" value="mixed" class="form-check-input"> Смешанная</label>
+                    <div id="phoneField" class="mb-3 d-none">
+                        <x-phone-input name="phone" placeholder="Номер телефона" />
+                        <input type="text" name="name" class="form-control mt-2" placeholder="Имя">
+                    </div>
+
+                    <div id="mixedFields" class="mb-3 d-none">
+                        <input type="number" step="0.01" name="cash_amount" class="form-control mb-2" placeholder="Сумма наличными" oninput="updateMixed()">
+                        <input type="number" step="0.01" name="card_amount" class="form-control" placeholder="Сумма картой" oninput="updateMixed()">
+                    </div>
+
+                    <div class="d-flex flex-column flex-sm-row gap-2">
+                        <button type="submit" class="btn btn-success w-100">Создать заказ</button>
+                        <form action="{{ route('products.clearCart') }}" method="POST" class="w-100">
+                            @csrf
+                            <button type="submit" class="btn btn-danger w-100">Очистить</button>
+                        </form>
+                    </div>
+                </form>
+
+                <hr>
+
+                <!-- Товары в корзине -->
+                @forelse($cart as $index => $item)
+                    <div class="mb-2 border-bottom pb-2">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <strong>{{ $item['name'] }}</strong>
+                            <small>{{ $item['quantity'] ?? 1 }} × {{ $item['price'] }} грн = {{ $item['price'] * ($item['quantity'] ?? 1) }} грн</small>
                         </div>
-
-                        <div id="cashHelper" class="mb-3 d-none">
-                            <input type="number" id="helpCash" name="helpCash" class="form-control mb-1" placeholder="Сумма которую дали" oninput="calculate()">
-                            <input disabled type="number" id="helpCashResult" class="form-control" placeholder="Остаток">
-                        </div>
-
-                        <div id="phoneField" class="mb-3 d-none">
-                            <x-phone-input name="phone" placeholder="Номер телефона" />
-                            <input type="text" name="name" class="form-control mt-2" placeholder="Имя">
-                        </div>
-
-                        <div id="mixedFields" class="mb-3 d-none">
-                            <input type="number" step="0.01" name="cash_amount" class="form-control mb-2" placeholder="Сумма наличными" oninput="updateMixed()">
-                            <input type="number" step="0.01" name="card_amount" class="form-control" placeholder="Сумма картой" oninput="updateMixed()">
-                        </div>
-
-                        <div class="d-flex gap-2">
-                            <button type="submit" class="btn btn-success w-100">Создать заказ</button>
-                            <form action="{{ route('products.clearCart') }}" method="POST" class="w-100">
-                                @csrf
-                                <button type="submit" class="btn btn-danger w-100">Очистить</button>
-                            </form>
-                        </div>
-                    </form>
-
-                    <hr>
-
-                    <!-- Товары в корзине -->
-                    @forelse($cart as $index => $item)
-                        <div class="mb-2 border-bottom pb-2">
-                            <strong>{{ $item['name'] }}</strong> — {{ $item['price'] }} грн
-                            @if (!empty($item['comment']))
-                                <div class="text-muted small">Комментарий: {{ $item['comment'] }}</div>
-                            @endif
-                            @if (!empty($item['seat_number']))
-                                <div class="text-muted small">Номерок: {{ $item['seat_number'] }}</div>
-                            @endif
-                            <form action="{{ route('products.removeFromCart', $index) }}" method="POST" class="d-inline">
+                        @if (!empty($item['comment']))
+                            <div class="text-muted small">Комментарий: {{ $item['comment'] }}</div>
+                        @endif
+                        @if (!empty($item['seat_number']))
+                            <div class="text-muted small">Номерок: {{ $item['seat_number'] }}</div>
+                        @endif
+                   
+                        <div class="d-flex justify-content-between align-items-center">
+                            <form action="{{ route('products.removeFromCart', $index) }}" method="POST" class="d-inline me-2">
                                 @csrf
                                 @method('DELETE')
-                                <button type="submit" class="btn btn-sm btn-link text-danger p-0">Удалить</button>
+                                <button type="submit" class="btn btn-sm btn-outline-danger">Удалить</button>
                             </form>
+
+                            <div class="d-flex align-items-center">
+                                <form action="{{ route('products.updateQuantity', $index) }}" method="POST" class="d-inline d-flex align-items-center">
+                                    @csrf
+                                    @method('PUT')
+                                    <button class="btn btn-sm btn-secondary me-1" name="action" value="decrease" type="submit">−</button>
+                                    <span class="mx-1">{{ $item['quantity'] ?? 1 }}</span>
+                                    <button class="btn btn-sm btn-secondary ms-1" name="action" value="increase" type="submit">+</button>
+                                </form>
+                            </div>
                         </div>
-                    @empty
-                        <p class="text-muted">Корзина пуста</p>
-                    @endforelse
-                </div>
+                    </div>
+                @empty
+                    <p class="text-muted">Корзина пуста</p>
+                @endforelse
+            </div>
+        </div>
+
+        <!-- Товары -->
+        <div class="mb-4">
+            <div class="row row-cols-2 row-cols-sm-3 g-3">
+                @foreach($products as $product)
+                    <div class="col">
+                        <div class="card h-100">
+                            <img src="{{ $product->photo ? asset('storage/' . $product->photo) : 'https://png.pngtree.com/png-vector/20221125/ourmid/pngtree-no-image-available-icon-flatvector-illustration-pic-design-profile-vector-png-image_40966566.jpg' }}" class="card-img-top" style="object-fit: contain; height: 100px; background-color: #f8f9fa;">
+                            <div class="card-body p-2">
+                                <h6 class="card-title">{{ $product->name }}</h6>
+                                <form method="POST" action="{{ route('products.addToCart') }}">
+                                    @csrf
+                                    <input type="number" name="quantity" value="1" min="1" class="form-control mb-2" placeholder="Кол-во">
+                                    @if (is_null($product->price))
+                                        <input type="number" step="0.01" name="custom_price" class="form-control mb-2" placeholder="Введите цену">
+                                    @else
+                                        <p class="card-text">Цена: {{ $product->price }} грн</p>
+                                    @endif
+                                    <input type="hidden" name="product_id" value="{{ $product->id }}">
+                                    <input type="hidden" name="category" value="{{ $selectedType }}">
+                                    @if ($product->type == 'culinary'||$product->type == 'cocktail')
+                                        <input type="text" name="comment" class="form-control mb-2" placeholder="Комментарий">
+                                        <input type="number" name="seat_number" class="form-control mb-2" placeholder="Номерок">
+                                    @endif
+                                    <button type="submit" class="btn btn-sm btn-success w-100">Добавить</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                @endforeach
             </div>
         </div>
     </div>

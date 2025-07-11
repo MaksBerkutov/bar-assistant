@@ -91,21 +91,67 @@ class ProductController extends Controller
     {
         $product = \App\Models\Product::findOrFail($request->product_id);
 
+        if (is_null($product->price)) {
+
+            $request->validate([
+                'custom_price' => 'required|numeric|min:0.01',
+            ]);
+        }
         $cart = session()->get('cart', []);
 
-        $cart[] = [
-            'product_id' => $product->id,
-            'name' => $product->name,
-            'price' => $product->price,
-            'comment' => $request->comment ?? null,
-            'seat_number' => $request->seat_number ?? null,
-            'type' => $product->type,
-        ];
+
+
+        $found = false;
+
+        foreach ($cart as &$item) {
+            if (
+                $item['product_id'] == $product->id &&
+                ($item['comment'] ?? '') == ($request->comment ?? '')
+            ) {
+                $item['quantity'] += $request->quantity ?? 1;
+                $found = true;
+                break;
+            }
+        }
+
+        if (!$found) {
+            $cart[] = [
+                'product_id' => $product->id,
+                'name' => $product->name,
+                'price' => $product->price ?? (float) $request->custom_price,
+                'comment' => $request->comment ?? null,
+                'seat_number' => $request->seat_number ?? null,
+                'type' => $product->type,
+                'quantity' => $request->quantity ?? 1,
+            ];
+        }
 
         session()->put('cart', $cart);
 
         return redirect()->route('products.operator', ['type' => $request->category]);
     }
+    public function updateQuantity(Request $request, $index)
+    {
+        $cart = session()->get('cart', []);
+
+        if (!isset($cart[$index])) {
+            return redirect()->back()->with('error', 'Товар не найден.');
+        }
+
+        $action = $request->input('action');
+        $quantity = $cart[$index]['quantity'] ?? 1;
+
+        if ($action === 'increase') {
+            $cart[$index]['quantity'] = $quantity + 1;
+        } elseif ($action === 'decrease' && $quantity > 1) {
+            $cart[$index]['quantity'] = $quantity - 1;
+        }
+
+        session()->put('cart', $cart);
+
+        return redirect()->back();
+    }
+
     public function clearCart() {
         session()->forget('cart');
         return redirect()->back();
@@ -128,7 +174,7 @@ class ProductController extends Controller
         $request->validate([
             'name' => 'required|string',
             'barcode' => 'string|nullable',
-            'price' => 'required|numeric',
+            'price' => 'numeric|nullable',
             'type' => 'required|string',
             'stock_quantity' => 'numeric|nullable',
             'purchase_price' => 'numeric|nullable',

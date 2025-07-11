@@ -52,7 +52,7 @@
 
             <div class="col-md-6">
                 <label for="price" class="form-label">Цена продажи (грн):</label>
-                <input type="number" name="price" step="0.01" class="form-control" required>
+                <input type="number" name="price" step="0.01" class="form-control" >
             </div>
 
             <div class="col-md-6">

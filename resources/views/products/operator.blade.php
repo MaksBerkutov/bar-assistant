@@ -45,9 +45,16 @@
                                      class="card-img-top" style="object-fit: contain; height: 140px; background-color: #f8f9fa;">
                                 <div class="card-body">
                                     <h5 class="card-title">{{ $product->name }}</h5>
-                                    <p class="card-text">Цена: {{ $product->price }} грн</p>
                                     <form method="POST" action="{{ route('products.addToCart') }}">
                                         @csrf
+                                        <input type="number" name="quantity" value="1" min="1" class="form-control mb-2" placeholder="Количество">
+
+                                        @if (is_null($product->price))
+                                            <input type="number" step="0.01" name="custom_price" class="form-control mb-2" placeholder="Введите цену">
+                                        @else
+                                            <p class="card-text">Цена: {{ $product->price }} грн</p>
+                                        @endif
+
                                         <input type="hidden" name="product_id" value="{{ $product->id }}">
                                         <input type="hidden" name="category" value="{{ $selectedType }}">
                                         @if ($product->type == 'culinary'||$product->type == 'cocktail')
@@ -71,7 +78,10 @@
                         <h4 class="mb-0">Текущий заказ</h4>
                     </div>
                     <div class="card-body">
-                        @php $total = array_sum(array_column($cart, 'price')); @endphp
+                        @php  $total = collect($cart)->sum(function ($item) {
+        return $item['price'] * ($item['quantity'] ?? 1);
+    });
+  @endphp
 
                             <!-- ВЕРХ: Управление заказом -->
                         <div class="mb-3 border-bottom pb-3">
@@ -82,11 +92,11 @@
 
                                 <div class="mb-3">
                                     <label><input type="radio" name="payment_type" value="card" class="form-check-input"> Безналичный</label><br>
-                                    <label><input type="radio" name="payment_type" value="cash" class="form-check-input" checked> Наличный</label><br>
+                                    <label><input type="radio" name="payment_type" value="cash" class="form-check-input"  checked> Наличный</label><br>
                                     <label><input type="radio" name="payment_type" value="debt" class="form-check-input"> В долг</label><br>
                                     <label><input type="radio" name="payment_type" value="mixed" class="form-check-input"> Смешанная оплата</label>
                                 </div>
-                                <div id="cashHelper" class="mb-3 d-none">
+                                <div id="cashHelper" class="mb-3">
                                     <input type="number" id="helpCash" name="helpCash" class="form-control" placeholder="Сумма которую дали" oninput="calculate()">
                                     <input disabled type="number" id="helpCashResult" name="helpCashResult" class="form-control" placeholder="Остаток суммы">
 
@@ -118,32 +128,45 @@
                         </div>
                     </div>
 
-                        <hr>
+                    <hr>
 
-                        <!-- НИЗ: Список товаров -->
-                        @forelse($cart as $index => $item)
-                            <div class="mb-2 border-bottom pb-2">
-                                <strong>{{ $item['name'] }}</strong> — {{ $item['price'] }} грн
-                                @if (!empty($item['comment']))
-                                    <div class="text-muted small">Комментарий: {{ $item['comment'] }}</div>
-                                @endif
-                                @if (!empty($item['seat_number']))
-                                    <div class="text-muted small">Номерок: {{ $item['seat_number'] }}</div>
-                                @endif
-                                <form action="{{ route('products.removeFromCart', $index) }}" method="POST" class="d-inline">
+                    <!-- НИЗ: Список товаров -->
+                    @forelse($cart as $index => $item)
+                        <div class="mb-2 border-bottom pb-2">
+
+                        @if (!empty($item['comment']))
+                                <div class="text-muted small">Комментарий: {{ $item['comment'] }}</div>
+                            @endif
+                            @if (!empty($item['seat_number']))
+                                <div class="text-muted small">Номерок: {{ $item['seat_number'] }}</div>
+                            @endif
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <strong>{{ $item['name'] }}</strong>
+                                <small>{{ $item['quantity'] ?? 1 }} × {{ $item['price'] }} грн = {{ $item['price'] * ($item['quantity'] ?? 1) }} грн</small>
+
+                                <form action="{{ route('products.updateQuantity', $index) }}" method="POST" class="d-inline d-flex align-items-center">
                                     @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="btn btn-sm btn-link text-danger p-0">Удалить</button>
+                                    @method('PUT')
+                                    <button class="btn btn-sm btn-secondary me-1" name="action" value="decrease" type="submit">−</button>
+                                    <span class="mx-1">{{ $item['quantity'] ?? 1 }}</span>
+                                    <button class="btn btn-sm btn-secondary ms-1" name="action" value="increase" type="submit">+</button>
                                 </form>
                             </div>
-                        @empty
-                            <p class="text-muted">Корзина пуста</p>
-                        @endforelse
 
-                    </div>
+                            <form action="{{ route('products.removeFromCart', $index) }}" method="POST" class="d-inline">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="btn btn-sm btn-link text-danger p-0">Удалить</button>
+                            </form>
+                        </div>
+                    @empty
+                        <p class="text-muted">Корзина пуста</p>
+                    @endforelse
+
                 </div>
             </div>
         </div>
+    </div>
     </div>
 
     <script>

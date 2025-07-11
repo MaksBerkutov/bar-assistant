@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('barcode')->nullable(); // Для кулинарии может быть null
             $table->enum('type', ['inventory', 'culinary', 'cocktail','hookah','draft','services']);
             $table->integer('stock_quantity')->nullable(); // Только для складских товаров
-            $table->decimal('price', 8, 2);
+            $table->decimal('price', 8, 2)->nullable();
             $table->text('photo')->nullable(); // Путь к фото
             $table->timestamps();
         });
